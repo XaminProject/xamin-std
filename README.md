@@ -1,19 +1,30 @@
-Install phpcs 
+Installation
 =============
-via pear : pear install PHP_CodeSniffer
+first of all install php code sniffer:
+`pear install PHP_CodeSniffer`
 
-copy phpcs-rules/Xamin directory into pear/PHP/CodeSniffer/Standards
+as rules / hook may change during time, do NOT copy them directly, instead use soft link.
 
-for check a file use this command : phpcs --standard=Xamin file.php
-see phpcs example folder 
+Rules
+-----
+`cd /path/to/pear/PHP/CodeSniffer/Standards/`
+`ln -s /path/to/xamin-std/phpcs-rules/Xamin Xamin`
 
+git-hook
+--------
+`cd /path/to/your/git/project/.git/hooks/`
+`ln -s /path/to/xamin-std/git-hooks/pre-commit pre-commit`
 
-Install jshint 
+*note*: you can ignore this hook with --no-verify switch.
+
+checking a file manualy
+-----------------------
+`phpcs --standard=Xamin file.php`
+
+example
+-------
+take a look at `php-cs example` directory
+
+Install jshint
 ==============
-http://www.jshint.com/ 
-
-GIT pre-commit file
-===================
-copy this file into YOUR git repository (YOUR working copy) .git/hooks folder and make it executable.
-
-you can ignore this hook with --no-verify switch. 
+http://www.jshint.com/
