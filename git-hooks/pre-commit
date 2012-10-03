@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 echo "pre-commit hook\n";
-$staged = `git diff --cached --name-status`;
+$staged = `git diff --staged --cached --name-status`;
 $staged = explode("\n", $staged);
 foreach ($staged as &$single)
 	$single = explode("\t", $single);
