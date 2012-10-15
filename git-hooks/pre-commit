@@ -4,7 +4,7 @@
 RunTest()
 {
     if [ -z "$1" ] || [ -z "$2" ];then
-        return 1
+        return 0
     else
         CMD=$1
         Staged=$2
@@ -13,25 +13,32 @@ RunTest()
             if [ $? != 0 ]; then
                 case $CMD in
                     "php -l")
-                        echo "Check for file \"$address\" failed, result is : $result"
+                        echo "Check for file \"$address\" failed, result is:\n$result"
                         ;;
                     "phpcs --standard=Xamin")
-                        echo "Codesniffer check on \"$address\" failed, result is : $result"
+                        echo "Codesniffer check on \"$address\" failed, result is:\n$result"
                         ;;
                     "jshint")
-                        echo "Check for file \"$address\" failed, result is : $result"
+                        echo "Check for file \"$address\" failed, result is:\n$result"
+                        ;;
+                    "pep8")
+                        echo "you've syntax issue in \"$address\": \n$result"
+                        ;;
+                    "pep257")
+                        echo "you've missed docstring standards in \"$address\":\n$result"
                         ;;
                 esac
-                exit 1
+                return 1
             fi
         done
     fi
+    return 0
 }
 
 FindInvalidKeys()
 {
     if [ -z "$1" ] || [ -z "$2" ];then 
-        return 1
+        return 0
     else
         Staged=$1
         InvalKeys=$2
@@ -40,15 +47,15 @@ FindInvalidKeys()
                 result=`grep -iHn $key "$address" 2>&1`
                 if [ $? == 0 ]; then 
                     echo "Found invalid keyword : $address : $result"
-                    exit 1
+                    return 1
                 fi
             done
         done
     fi
+    return 0
 }
 
 PHPInvalidKeys="xdebug_break var_dump print_r"
-#echo "pre-commit hook"
 Staged=`git diff --staged --cached --name-status`
 Staged=`echo "$Staged" | grep -v "^D" | sed -e 's/^.\t//g'`
 
@@ -56,12 +63,20 @@ StagedJS=`echo "$Staged" | grep "\.js$"`
 StagedPHP=`echo "$Staged" | grep "\.php$"`
 StagedPY=`echo "$Staged" | grep "\.py$"`
 
-RunTest "php -l" "$StagedPHP" 
-FindInvalidKeys "$StagedPHP" "$PHPInvalidKeys"
-RunTest "phpcs --standard=Xamin" "$StagedPHP" 
-RunTest "jshint" "$StagedJS" 
-RunTest "pep8" "$StagedPY"
-RunTest "Pep257" "$StagedPY"
+code=0
 
-exit 0
+RunTest "php -l" "$StagedPHP" 
+code=`expr $code + $?`
+FindInvalidKeys "$StagedPHP" "$PHPInvalidKeys"
+code=`expr $code + $?`
+RunTest "phpcs --standard=Xamin" "$StagedPHP" 
+code=`expr $code + $?`
+RunTest "pep8" "$StagedPY"
+code=`expr $code + $?`
+RunTest "pep257" "$StagedPY"
+code=`expr $code + $?`
+RunTest "jshint" "$StagedJS"
+code=`expr $code + $?`
+
+exit $code
 
