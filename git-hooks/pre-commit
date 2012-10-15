@@ -60,7 +60,8 @@ RunTest "php -l" "$StagedPHP"
 FindInvalidKeys "$StagedPHP" "$PHPInvalidKeys"
 RunTest "phpcs --standard=Xamin" "$StagedPHP" 
 RunTest "jshint" "$StagedJS" 
-
-
+RunTest "pep8" "$StagedPY"
+RunTest "Pep257" "$StagedPY"
 
 exit 0
+
