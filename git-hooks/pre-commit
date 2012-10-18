@@ -13,19 +13,19 @@ RunTest()
             if [ $? != 0 ]; then
                 case $CMD in
                     "php -l")
-                        echo "Check for file \"$address\" failed, result is:\n$result"
+                        echo -e "Check for file \"$address\" failed, result is:\n$result"
                         ;;
                     "phpcs --standard=Xamin")
-                        echo "Codesniffer check on \"$address\" failed, result is:\n$result"
+                        echo -e "Codesniffer check on \"$address\" failed, result is:\n$result"
                         ;;
                     "jshint")
-                        echo "Check for file \"$address\" failed, result is:\n$result"
+                        echo -e "Check for file \"$address\" failed, result is:\n$result"
                         ;;
                     "pep8")
-                        echo "you've syntax issue in \"$address\": \n$result"
+                        echo -e "you've syntax issue in \"$address\": \n$result"
                         ;;
                     "pep257")
-                        echo "you've missed docstring standards in \"$address\":\n$result"
+                        echo -e "you've missed docstring standards in \"$address\":\n$result"
                         ;;
                 esac
                 return 1
@@ -65,18 +65,41 @@ StagedPY=`echo "$Staged" | grep "\.py$"`
 
 code=0
 
-RunTest "php -l" "$StagedPHP" 
-code=`expr $code + $?`
-FindInvalidKeys "$StagedPHP" "$PHPInvalidKeys"
-code=`expr $code + $?`
-RunTest "phpcs --standard=Xamin" "$StagedPHP" 
-code=`expr $code + $?`
-RunTest "pep8" "$StagedPY"
-code=`expr $code + $?`
-RunTest "pep257" "$StagedPY"
-code=`expr $code + $?`
-RunTest "jshint" "$StagedJS"
-code=`expr $code + $?`
+ret=$(RunTest "php -l" "$StagedPHP")
+if [ ! -z "$ret" ]; then
+  printf "$ret"
+  exit 1
+fi
+ret=$(FindInvalidKeys "$StagedPHP" "$PHPInvalidKeys")
+if [ ! -z "$ret" ]; then
+  printf "$ret"
+  exit 1
+fi
 
-exit $code
+ret=$(RunTest "phpcs --standard=Xamin" "$StagedPHP")
+if [ ! -z "$ret" ]; then
+  printf "$ret"
+  exit 1
+fi
+
+ret=$(RunTest "pep8" "$StagedPY")
+if [ ! -z "$ret" ]; then
+  printf "$ret"
+  exit 1
+fi
+
+ret=$(RunTest "pep257" "$StagedPY")
+if [ ! -z "$ret" ]; then
+  printf "$ret"
+  exit 1
+fi
+
+ret=$(RunTest "jshint" "$StagedJS")
+if [ ! -z "$ret" ]; then
+  printf "$ret"
+  exit 1
+fi
+
+
+exit 0
 
